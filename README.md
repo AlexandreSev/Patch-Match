@@ -7,3 +7,5 @@ Sources:
 - Kwatra, V., Schödl, A., Essa, I., Turk, G., & Bobick, A. (2003, July). Graphcut textures: image and video synthesis using graph cuts. In ACM Transactions on Graphics (ToG) (Vol. 22, No. 3, pp. 277-286). ACM.
 
 - http://cs.brown.edu/courses/csci1290/2011/asgn/proj3/
+
+For any remark, advice or question, please send me an email at sevin.alexandre@gmail.com
