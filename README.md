@@ -1,6 +1,11 @@
 # Patch-Match
 Implementation of some papers for hole filling in pictures.
 
+To use the file ./hole_filling/patch_match.ipynb:
+- change the path of the picture
+- change psi_min and psi_max. They are the limits of the patch size considered
+- change the variable search_area_size to limit the computational cost
+
 Sources: 
 - Criminisi, A., Pérez, P., & Toyama, K. (2004). Region filling and object removal by exemplar-based image inpainting. IEEE Transactions on image processing, 13(9), 1200-1212.
 
