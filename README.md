@@ -7,7 +7,7 @@ To use the file ./hole_filling/patch_match.ipynb:
 - change the variable search_area_size to limit the computational cost
 
 Sources: 
-- ...
+- ....
 
 - Criminisi, A., Pérez, P., & Toyama, K. (2004). Region filling and object removal by exemplar-based image inpainting. IEEE Transactions on image processing, 13(9), 1200-1212.
 
