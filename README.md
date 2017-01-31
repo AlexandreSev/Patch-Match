@@ -1,6 +1,8 @@
 ﻿# Patch-Match
 Implementation of some papers for hole filling in pictures.
 
+For the demo, please run the patch_match.ipynb notebook, located at ./hole_filling/.
+
 To use the file ./hole_filling/patch_match.ipynb:
 - change the path of the picture
 - change psi_min and psi_max. They are the limits of the patch size considered
@@ -9,6 +11,8 @@ To use the file ./hole_filling/patch_match.ipynb:
 Sources:
 
 - Mazumder, R., Hastie, T., & Tibshirani, R. (2010). Spectral regularization algorithms for learning large incomplete matrices. Journal of machine learning research, 11(Aug), 2287-2322.
+
+- Srebro N., Rennie J., Jaakola S T. (2004). Maximum-margin Matrix factorization. Advances in Neural Information Processing Systems, 1329-1336.
 
 - Hastie, T., Mazumder, R., Lee, J. D., & Zadeh, R. (2015). Matrix completion and low-rank svd via fast alternating least squares. J. Mach. Learn. Res, 16(1), 3367-3402.
 
@@ -22,4 +26,8 @@ Sources:
 
 - http://cs.brown.edu/courses/csci1290/2011/asgn/proj3/
 
-For any remark, advice or question, please send me an email at sevin.alexandre@gmail.com
+For any remark, advice or question, please send us an email at one of the following email addresses:
+- sevin.alexandre@gmail.com
+- hamid.jalalzai@gmail.com
+- paul.roujansky@ensae.fr
+- benoit.choffin@ensae.fr
