@@ -8,7 +8,7 @@ If you want to use the algorithm with your own picture, pls use the file ./hole_
 # Matrix Completion
 Implementation of some papers for Matrix Completion in pictures.
 
-For the demo on images please run the MatrixCompletionAndLarge-scaleSVDComputations_implementation20173101_0430.ipynb notebook, located at ./matrix_completion/
+For the demo on images please run the MatrixCompletion.ipynb notebook, located at ./matrix_completion/
 
 For the demo on video please run the denoisesimpleCV.py file, located at ./matrix_completion/
 
