@@ -8,11 +8,6 @@ import math
 threshold = 0.9
 cam = Camera(0)
 disp = Display((512,512))
-#while(disp.isNotDone()):
-	#img = cam.getImage()
-	#img.getGrayNumpy()
-	#img.drawText("Paul, virons ce texte", 40,40, fontsize=60, color=Color.RED)
-	#img.save(disp)
 
 def noise(X, PropObserved):
 	Noisyimage = X.copy()
@@ -129,25 +124,14 @@ while True and iter<20:
         pic = current.getNumpy()[:,:,0].T
         #matrix = diff.getNumpy()
         #mean = matrix.mean()
-        noisyPic = noise(pic, 0.6)
-        denoised = NMF(noisyPic, 5)
+        noisyPic = noise(pic, 0.7)
+        denoised = NMF(noisyPic, 50 ,Max_iter=20)
 
         if iter % 2 == 0:
         	stackpred[:,:,0] = noisyPic+project(denoised, noisyPic)
         elif iter % 2 == 1:
         	stackpred[:,:,1] = noisyPic+project(denoised, noisyPic)
-        #### Display
-        #plt.ion()
-        #plt.figure(1)
-        #plt.imshow(noisyPic, cmap='gray')
-        #plt.title("Noisy Image")
-        #plt.draw()
-        #plt.show()
-        
-        #plt.figure(2)
-        #plt.title("Denoised Image")
-        #plt.imshow(noisyPic+project(denoised,noisyPic), cmap='gray')
-        #plt.draw()
+
        	current.show()
        	plt.ion()
        	plt.figure(3)
