@@ -5,6 +5,13 @@ For the demo, please run the patch_match.ipynb notebook, located at ./hole_filli
 
 If you want to use the algorithm with your own picture, pls use the file ./hole_filing/Create_hole.ipynb to create a hole in the right format.
 
+# Matrix Completion
+Implementation of some papers for Matrix Completion in pictures.
+
+For the demo on images please run the MatrixCompletionAndLarge-scaleSVDComputations_implementation20173101_0430.ipynb notebook, located at ./matrix_completion/
+
+For the demo on video please run the denoisesimpleCV.py file, located at ./matrix_completion/
+
 ## Sources:
 
 - Mazumder, R., Hastie, T., & Tibshirani, R. (2010). Spectral regularization algorithms for learning large incomplete matrices. Journal of machine learning research, 11(Aug), 2287-2322.
@@ -24,7 +31,7 @@ If you want to use the algorithm with your own picture, pls use the file ./hole_
 - http://cs.brown.edu/courses/csci1290/2011/asgn/proj3/
 
 For any remark, advice or question, please send us an email at one of the following email addresses:
-- sevin.alexandre@gmail.com
-- hamid.jalalzai@gmail.com
-- paul.roujansky@ensae.fr
-- benoit.choffin@ensae.fr
+- sevin DOT alexandre AT gmail DOT com
+- hamid DOT jalalzai AT gmail DOT com
+- paul DOT roujansky AT ensae DOT fr
+- benoit DOT choffin AT ensae DOT fr
