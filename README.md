@@ -3,12 +3,9 @@ Implementation of some papers for hole filling in pictures.
 
 For the demo, please run the patch_match.ipynb notebook, located at ./hole_filling/.
 
-To use the file ./hole_filling/patch_match.ipynb:
-- change the path of the picture
-- change psi_min and psi_max. They are the limits of the patch size considered
-- change the variable search_area_size to limit the computational cost
+If you want to use the algorithm with your own picture, pls use the file ./hole_filing/Create_hole.ipynb to create a hole in the right format.
 
-Sources:
+## Sources:
 
 - Mazumder, R., Hastie, T., & Tibshirani, R. (2010). Spectral regularization algorithms for learning large incomplete matrices. Journal of machine learning research, 11(Aug), 2287-2322.
 
