@@ -84,19 +84,14 @@ def findbestmatch(patch, img, is_compared, patch_x, patch_y, psi, search_area_si
     return result_x, result_y, result_r
 
 def find_best_match(patch, marged_img, is_compared, patch_x, patch_y, psi, search_area_size=100, 
-		verbose=True, rotation=True, multi_processing=True, n_processes=None, threading=False):
+		verbose=True, rotation=True, multi_processing=True, n_processes=None):
     """
     Return the part of the picture with the lowest distance to the patch.
     """
     if multi_processing:
-        if threading:
-            result_x, result_y, result_r = findbestmatchmultithread(patch, marged_img, is_compared, patch_x, 
-            	patch_y, psi, search_area_size=search_area_size, verbose=verbose, rotation=rotation, 
-                n_processes=n_processes)
-        else:
-            result_x, result_y, result_r = findbestmatchmultiprocess(patch, marged_img, is_compared, patch_x, 
-                patch_y, psi, search_area_size=search_area_size, verbose=verbose, rotation=rotation, 
-                n_processes=n_processes)
+        result_x, result_y, result_r = findbestmatchmultiprocess(patch, marged_img, is_compared, patch_x, 
+            patch_y, psi, search_area_size=search_area_size, verbose=verbose, rotation=rotation, 
+            n_processes=n_processes)
     else:
         result_x, result_y, result_r = findbestmatch(patch, marged_img, is_compared, patch_x, 
         	patch_y, psi, search_area_size=search_area_size, verbose=verbose, rotation=rotation)
@@ -208,91 +203,6 @@ def findbestmatchmultiprocess(patch, img, is_compared, patch_x, patch_y, psi=9, 
 
     if verbose:
     	print '*** Done'
-
-    time.sleep(1)
-
-    return get_result(result_queue)
-
-
-class Worker_thread(threading.Thread):
-    """
-    Define a custon worker with two more attributes
-    """
-
-    def __init__(self, args=()):
-        threading.Thread.__init__(self)
-        self.args = args
-        self.result = (0, 0, 0)
-        self.distance = 99999
-
-    def run(self):
-        queue, result_queue, img, is_compared, gauss, patch, psi, verbose = self.args
-        self.worker_function(queue, result_queue, img, is_compared, gauss, patch, psi, verbose)
-        return
-
-    def worker_function(self, queue, result_queue, img, is_compared, gauss, patch, psi, verbose=True):
-        """
-        While the queue with all works is not empty, the worker will take the last element, Compute
-        the calcul and store this element if the distance to the patch is the smallest he found.
-        """
-        patch_comp = patch * is_compared
-        with cython.nogil:
-            while True:
-                if queue.qsize() == 0:
-                    break
-                i, j, r = queue.get()
-                if (i<psi/2) | (j<psi/2) | (i>img.shape[0]-psi/2-1) | (j>img.shape[1]-psi/2-1):
-                    queue.task_done()
-                else:
-                    if (queue.qsize()%10000 == 0) & verbose:
-                        print("The queue size is %s"%queue.qsize())
-                    img_comp = img[i - psi/2: i + psi/2+1, j - psi/2: j + psi/2+1].copy()
-                    img_comp = np.rot90(img_comp, r)
-                    if np.all(img_comp[:, :, 0] != -1):
-                        img_comp *= is_compared
-                        #print(img_comp.shape)
-                        if distance(img_comp, patch_comp, is_compared[:, :, 0], gauss) < self.distance:
-                            self.distance = distance(img_comp, patch_comp, is_compared[:, :, 0], gauss)
-                            self.result = (i, j, r)
-                        #result_queue.put(((i,j), distance(img_comp, patch_comp, is_compared[:, :, 0], gauss)))
-                    queue.task_done()
-        result_queue.put((self.distance, self.result))
-        return
-
-def findbestmatchmultithread(patch, img, is_compared, patch_x, patch_y, psi=9, search_area_size=200, 
-        verbose=True, rotation=False, n_processes=None):
-    """
-    Find the best match with multithreading.
-    """
-    if rotation:
-        r_max = 4
-    else:
-        r_max = 1
-
-    main_queue = Queue() 
-    create_queue(main_queue, patch_x, patch_y, r_max, search_area_size)
-    result_queue = Queue()
-
-    if n_processes is None:
-        num_processes = multiprocessing.cpu_count()
-    else:
-        num_processes = n_processes
-    gauss = create_kernel_patch(is_compared[:, :, 0], psi)
-
-    jobs = []
-    for i in range(num_processes):
-        p = Worker_thread(args=(main_queue, result_queue, img, is_compared, gauss, patch, psi, verbose))
-        jobs.append(p)
-        p.start()
-
-    if verbose:
-        print '*** Main thread waiting'
-
-    for job in jobs:
-        job.join()
-
-    if verbose:
-        print '*** Done'
 
     time.sleep(1)
 
