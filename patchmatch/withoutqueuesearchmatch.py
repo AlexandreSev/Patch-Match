@@ -34,9 +34,9 @@ def create_kernel_patch(is_compared, psi):
                 result += create_kernel_local(i, j, psi)
                 counter += 1
     result = result.astype(np.float) / counter
-    return result
+    return result * is_compared
 
-def distance(img1, img2, is_compared, gauss, param=2):
+def distance(img1, img2, gauss, param=2):
     """
     Compute the distance between two patchs
     """
@@ -120,35 +120,29 @@ class Worker_process(multiprocessing.Process):
     	self.distance = 99999
 
     def run(self):
-    	queue, result_queue, img, is_compared, gauss, patch, psi, verbose = self.args
-    	self.worker_function(queue, result_queue, img, is_compared, gauss, patch, psi, verbose)
+    	img_temp, result_queue, gauss, patch, psi, size_x, size_y, decal_i, decal_j, r_max, verbose = self.args
+    	self.worker_function(img_temp, result_queue, gauss, patch, psi, size_x, size_y, decal_i, decal_j, r_max, verbose)
     	return
 
-    def worker_function(self, queue, result_queue, img, is_compared, gauss, patch, psi, verbose=True):
+    def worker_function(self, img_temp, result_queue, gauss, patch, psi, size_x, size_y, 
+                        decal_i, decal_j, r_max=1, verbose=True):
     	"""
     	While the queue with all works is not empty, the worker will take the last element, Compute
     	the calcul and store this element if the distance to the patch is the smallest he found.
     	"""
-        patch_comp = patch * is_compared
-        while True:
-            if queue.qsize() == 0:
-                break
-            i, j, r = queue.get()
-            if (i<psi/2) | (j<psi/2) | (i>img.shape[0]-psi/2-1) | (j>img.shape[1]-psi/2-1):
-                queue.task_done()
-            else:
-                if (queue.qsize()%10000 == 0) & verbose:
-                    print("The queue size is %s"%queue.qsize())
-                img_comp = img[i - psi/2: i + psi/2+1, j - psi/2: j + psi/2+1].copy()
-                img_comp = np.rot90(img_comp, r)
-                if np.all(img_comp[:, :, 0] != -1):
-                    img_comp *= is_compared
-                    #print(img_comp.shape)
-                    if distance(img_comp, patch_comp, is_compared[:, :, 0], gauss) < self.distance:
-                        self.distance = distance(img_comp, patch_comp, is_compared[:, :, 0], gauss)
-                        self.result = (i, j, r)
-                    #result_queue.put(((i,j), distance(img_comp, patch_comp, is_compared[:, :, 0], gauss)))
-                queue.task_done()
+        
+        for i in range(psi, img_temp.shape[0] - psi + 1):
+            for j in range(psi, img_temp.shape[1] - psi + 1):
+                for r in range(r_max):
+                    if (i<psi/2) | (j<psi/2) | (i>size_x-psi/2-1) | (j>size_y-psi/2-1):
+                        pass
+                    else:
+                        img_comp = img_temp[i - psi/2: i + psi/2+1, j - psi/2: j + psi/2+1].copy()
+                        img_comp = np.rot90(img_comp, r)
+                        if np.all(img_comp[:, :, 0] != -1):
+                            if distance(img_comp, patch, gauss) < self.distance:
+                                self.distance = distance(img_comp, patch, gauss)
+                                self.result = (decal_i + i, decal_j + j, r)
         result_queue.put((self.distance, self.result))
         return
 
@@ -184,8 +178,6 @@ def findbestmatchmultiprocess(patch, img, is_compared, patch_x, patch_y, psi=9, 
     else:
         r_max = 1
 
-    main_queue = Queue() 
-    create_queue(main_queue, patch_x, patch_y, r_max, search_area_size)
     result_queue = Queue()
 
     if n_processes is None:
@@ -194,9 +186,28 @@ def findbestmatchmultiprocess(patch, img, is_compared, patch_x, patch_y, psi=9, 
         num_processes = n_processes
     gauss = create_kernel_patch(is_compared[:, :, 0], psi)
 
+    batch_size = (int(patch_x + search_area_size + 1) - max(0, int(patch_x - search_area_size))) \
+                                    // num_processes
+
+
+    i_min = max(0, int(patch_x - search_area_size - psi))
+    j_min, j_max = max(0, int(patch_y - search_area_size)), int(patch_y + search_area_size + 1)
+    size_x = img.shape[0]
+    size_y = img.shape[1]
+
     jobs = []
     for i in range(num_processes):
-    	p = Worker_process(args=(main_queue, result_queue, img, is_compared, gauss, patch, psi, verbose))
+        if i == num_processes - 1:
+            i_max = int(patch_x + search_area_size + 1)
+        else:
+            i_max = (i+1) * batch_size + psi + 1
+
+        img_temp = img[i_min + max(0, i * batch_size - psi): min(img.shape[0], i_max), 
+                        max(0, j_min - psi): min(img.shape[1], j_max + psi + 1), :]
+        decal_i = i_min + max(0, i * batch_size - psi)
+        decal_j = max(0, j_min - psi)
+        p = Worker_process(args=(img_temp, result_queue, gauss, patch, psi, size_x, size_y, 
+            decal_i, decal_j, r_max, verbose))
         jobs.append(p)
         p.start()
 
@@ -212,6 +223,9 @@ def findbestmatchmultiprocess(patch, img, is_compared, patch_x, patch_y, psi=9, 
     time.sleep(1)
 
     return get_result(result_queue)
+    result = get_result(result_queue)
+    print("Result: ", result)
+    return result
 
 
 class Worker_thread(threading.Thread):
@@ -254,8 +268,7 @@ class Worker_thread(threading.Thread):
                         if distance(img_comp, patch_comp, is_compared[:, :, 0], gauss) < self.distance:
                             self.distance = distance(img_comp, patch_comp, is_compared[:, :, 0], gauss)
                             self.result = (i, j, r)
-                        #result_queue.put(((i,j), distance(img_comp, patch_comp, is_compared[:, :, 0], gauss)))
-                    queue.task_done()
+                        queue.task_done()
         result_queue.put((self.distance, self.result))
         return
 
@@ -296,4 +309,6 @@ def findbestmatchmultithread(patch, img, is_compared, patch_x, patch_y, psi=9, s
 
     time.sleep(1)
 
-    return get_result(result_queue)
+    result = get_result(result_queue)
+    print("Result: ", result)
+    return result
